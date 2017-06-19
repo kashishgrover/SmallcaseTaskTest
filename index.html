@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+  <head>
+    <meta charset="utf-8">
+    <title>Smallcase Task</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/ngDraggable/ngDraggable.js"></script>    
+    <script src="bower_components/d3/d3.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/controller.js"></script>    
+    <script src="js/filter.js"></script>
+    <script src="js/directive.js"></script>
+    <!-- AMCHARTS -->
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+  </head>
+  <body ng-app="SmallcaseTask" ng-controller="stocksController">
+      <nav class="Navbar"></nav>
+      <div class="wrapper flexy">
+        <div class="smallcase-Portfolio">
+          smallcase Portfolio Builder
+        </div>
+        <div class="Panel">
+          <div class="PanelLabel PickStocksLabel PanelLabelText">PICK STOCKS</div>
+          <p class="showing-x-of-y">
+            Showing {{currentPage * stockPageSize + 1}} to 
+            {{(currentPage * stockPageSize + stockPageSize) > totalStocks ? totalStocks : (currentPage * stockPageSize + stockPageSize)}} 
+            of {{totalStocks}} stocks
+          </p>
+          <div class="StockCardWrapper flexy">
+            <div class="StockCard"
+              ng-repeat="element in stockPrices | pagination: currentPage * stockPageSize | limitTo: stockPageSize" 
+              ng-style="{display: inline-block} " 
+              ng-drag="true" 
+              ng-drag-data="element" 
+              ng-drag-success="onDragComplete($data,$event)"
+              ng-click="onClick(element)"
+              ng-center-anchor="true"><!-- Hover on me  -->
+                <div class="StockName">{{element[0]}}</div>
+                <div class="StockPrice">₹ {{element[1]}}</div>
+               <!--  <div class="material-icons StockPrice AddStockButton"></div> --> <!-- Then Show This -->
+                <div class="StockLabel">Financial Services</div>
+            </div>
+          </div>
+          <button class="NEXT"
+            ng-disabled="currentPage >= totalStocks / stockPageSize - 1"
+            ng-click="currentPage = currentPage + 1"">NEXT
+          </button>          
+          <button class="PREV"
+            ng-click="currentPage = currentPage - 1" 
+            ng-disabled="currentPage == 0">PREV
+          </button>
+        </div>
+        <br>
+        <div class="Panel" ng-drop="true" ng-drop-success="onDropComplete($data,$event)">
+          <div class="PanelLabel ManagePortfolioLabel PanelLabelText">MANAGE PORTFOLIO</div>
+          <div class="TableWrapper">
+            <table>
+              <tr>
+                <th>NAME</th>
+                <th>PRICE</th>
+                <th>SHARES</th>
+                <th>WEIGHT</th>
+              </tr>
+              <tr ng-repeat="element in portfolioArray">
+                <td class="StockRowNameLabel">{{element[0].split(",")[0]}}</td>
+                <td class="StockRowPriceLabel">₹ {{element[0].split(",")[1]}}</td>
+                <td class="StockRowSharesWrapper">
+                  <button class="DecrementSharesCount"
+                    ng-click="decrementShareCount(element)">
+                    - 
+                  </button>
+                  <div class="StockRowSharesCount">{{element[1]}}</div>
+                  <button class="IncrementSharesCount"
+                    ng-click="incrementShareCount(element)">
+                    + 
+                  </button>
+                </td>
+                <td class="StockRowWeight">{{getWeightage(element)}} %</td>
+              </tr>
+            </table>
+          </div>
+          <div class="Portfolio-Overview">
+            Portfolio Overview
+          </div>
+          <div linear-chart chart-data="arrayToPlot" class="HistoryGraphWrapper">
+            <!-- <div ></div> -->
+            <!-- <p ng-repeat="element in arrayToPlot">
+            {{element}}
+            </p> -->
+            <!-- <script src="js/graph.js"></script> -->
+            <!-- <div id="chartdiv"></div> -->
+          </div>
+          <div class="PortfolioDetailsWrapper flexy">
+            <div class="DetailBlock">
+              <div class="PortfolioDetailsLabel">Stocks</div>
+              <div class="PortfolioDetailsQuantity">{{portfolioArray.length}}</div>
+            </div>
+            <div class="DetailBlock">
+              <div class="PortfolioDetailsLabel">Net Worth</div>
+              <div class="PortfolioDetailsQuantity">₹ {{netWorth}}</div>
+            </div>
+            <div class="DetailBlock">
+              <div class="PortfolioDetailsLabel">P/E Ratio</div>
+              <div class="PortfolioDetailsQuantity">{{getPERatio()}}</div>
+            </div>
+            <div class="DetailBlock">
+              <div class="PortfolioDetailsLabel">P/B Ratio</div>
+              <div class="PortfolioDetailsQuantity">{{getPERatio()}}</div>
+            </div>
+            <button class="BuildButton">
+              BUILD PORTFOLIO
+            </button>
+          </div>
+        </div>
+        </div>
+      </div>
+  </body>
+</html>
